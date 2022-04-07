@@ -1,17 +1,12 @@
 import {NestFactory} from '@nestjs/core';
 import {AppModule} from './app.module';
 import {MicroserviceOptions, Transport} from "@nestjs/microservices";
-import {SQSServer} from "./transport-strategies/SQSServer";
+import {SQSTransportStrategy} from "./transport-strategies/SQSTransportStrategy";
 
 async function bootstrap() {
   const app = await NestFactory.create(AppModule)
-  const microService =  app.connectMicroservice<MicroserviceOptions>( {
-    /*transport: Transport.TCP,
-    options:{
-      host: 'localhost',
-      port: 3000
-    }*/
-    strategy: new SQSServer()
+  app.connectMicroservice<MicroserviceOptions>( {
+    strategy: new SQSTransportStrategy(new URL("http://localhost:4566/000000000000/tester"))
   }, {inheritAppConfig: true});
   await app.listen(3001);
   await app.startAllMicroservices()

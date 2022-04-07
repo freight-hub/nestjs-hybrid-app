@@ -6,10 +6,10 @@ import {EventPattern, MessagePattern} from "@nestjs/microservices";
 export class AppController {
   constructor(private readonly appService: AppService) {}
 
-  @Get("/love")
+  @Get("/test")
   @MessagePattern("hello")
   getHello(): string {
-    console.log('Hello')
+    console.log('Endpoint is working!!')
     return this.appService.getHello();
   }
 
