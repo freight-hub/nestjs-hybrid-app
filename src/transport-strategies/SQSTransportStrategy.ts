@@ -1,24 +1,16 @@
 import {CustomTransportStrategy, Server} from "@nestjs/microservices";
-import {ListQueuesCommand, SQSClient} from "@aws-sdk/client-sqs";
-import {
-    ReceiveMessageCommand,
-    DeleteMessageCommand,
-} from "@aws-sdk/client-sqs";
-import {
-    defer,
-    delay, filter,
-    repeat,
-    take,
-    throwError
-} from "rxjs";
+import {DeleteMessageCommand, ListQueuesCommand, ReceiveMessageCommand, SQSClient} from "@aws-sdk/client-sqs";
+import {defer, delay, filter, repeat, take, throwError} from "rxjs";
 
 export class SQSTransportStrategy extends Server implements CustomTransportStrategy {
     private readonly queueURL
     private readonly sqsClient
+    private readonly messageName
 
-    constructor(queueURL: URL) {
+    constructor(queueURL: URL, eventName: string) {
         super();
         this.queueURL = queueURL
+        this.messageName = eventName
         this.sqsClient = new SQSClient({
             region: "us-east-1",
             endpoint: this.queueURL.origin,
@@ -44,7 +36,7 @@ export class SQSTransportStrategy extends Server implements CustomTransportStrat
                   return true
                 }))
             .subscribe(async (data) => {
-                const handler = this.messageHandlers.get("hello-test")
+                const handler = this.messageHandlers.get(this.messageName)
                 try {
                     await handler(data)
                     console.log("Message successfully Processed, now deleting it")
@@ -90,8 +82,7 @@ export class SQSTransportStrategy extends Server implements CustomTransportStrat
                 VisibilityTimeout: 20,
                 WaitTimeSeconds: 0,
             };
-            const data = await this.sqsClient.send(new ReceiveMessageCommand(params));
-            return data; // For unit tests.
+            return await this.sqsClient.send(new ReceiveMessageCommand(params));
         } catch (err) {
             console.log("Receive Error", err);
             return throwError(err)
