@@ -6,7 +6,6 @@ export class SendMessage {
     name: 'Viresh Mahajan',
     email: 'viresh.mahajan@forto.com',
     city: 'Berlin',
-    id: 'ABC',
   };
   constructor() {
     this.sqsClient = new SQSClient({
@@ -35,10 +34,6 @@ export class SendMessage {
         },
       },
       MessageBody: JSON.stringify(data),
-      //MessageBody:
-      //   "Information about current NY Times fiction bestseller for week of 12/11/2016.",
-      // MessageDeduplicationId: "TheWhistler",  // Required for FIFO queues
-      // MessageGroupId: "Group1",  // Required for FIFO queues
       QueueUrl: 'http://localhost:4566/000000000000/tester', //SQS_QUEUE_URL; e.g., 'https://sqs.REGION.amazonaws.com/ACCOUNT-ID/QUEUE-NAME'
     };
     try {
